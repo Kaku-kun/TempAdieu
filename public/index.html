@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pot de départ</title>
+  <style>
+    body{
+  background: lightcyan;
+}
+
+h1{
+  margin: 10px;
+  padding: 10px 15px;
+  background-color: #00d5d5;
+  border: solid 1px turquoise;
+  border-radius: 10px;
+  color: darkslategray;
+  text-align: center;
+  font-size: 1.8rem;
+}
+
+  </style>
+</head>
+
+<body>
+  <h1>Tu viens à mon pot</h1>
+  <p>Comme tu le sais, mon aventure à l'hôpital suisse se conclut dans 1 mois et demi. Même si je vous aime presque tous, je m'envole de mes propres ailes.<br>
+  on part sur le 13 octobre dans un bar à 20h.<br>
+  Où ? On verra et ça va dépendre de si j'ai beaucoup d'amis.<br><br>
+  et toi est ce que tu viens ? </p>
+  <input type="text" id="nomInvite" placeholder="T'es qui déjà ?">
+  <button id="showdown">Je viens</button>
+  <p>Liste des gens confirmés.Vous pouvez annuler en cliquant la croix mais n'annulez pas un autre juste parce que vous ne l'aimez pas, Please. </p>
+  <ul id="listePresents">
+    
+  </ul>
+  
+  <script>
+
+const nomInviteInput = document.getElementById ("nomInvite");
+
+const showdownBtn = document.getElementById ("showdown");
+const listePresents = document.getElementById("listePresents");
+ 
+ const afficherInvites = ()=>{
+
+    listePresents.innerHTML = "";
+    
+  fetch("./presencePot.json")
+    .then(response => response.json())
+    .then(invites => {
+
+      
+      invites.forEach(invite => {
+
+        const li = document.createElement("li");
+        li.textContent = invite.name;
+
+        listePresents.appendChild(li);
+
+      });
+
+    })
+    .catch(error => {
+      console.error("Erreur lors du chargement des invités :", error);
+    });
+ } 
+    
+    const showdownFtn = async () =>{
+      const nom = nomInviteInput.value.trim();
+      if (!nom){
+        alert("t'as pas compris. Mets ton nom sinon je sais pas qui t'es.");
+        return;
+        }
+      
+      const response = await fetch("/ajouter-invite", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: nom
+    })
+  });
+
+  if (response.ok) {
+    nomInviteInput.value = "";
+    afficherInvites();
+  }
+    }
+    showdownBtn.addEventListener("click", showdownFtn);
+    afficherInvites();
+    
+  </script>
+</body>
+
+</html>
+Mieux ? 
