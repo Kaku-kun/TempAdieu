@@ -7,35 +7,74 @@
   <title>Pot de départ</title>
   <style>
     body{
-  background: lightcyan;
+  background: #eef2f1;
+  color: #293534;
 }
 
 h1{
   margin: 10px;
   padding: 10px 15px;
-  background-color: #00d5d5;
-  border: solid 1px turquoise;
+  background-color: #d8e8e3;;
+  border: solid 1px #b7d2ca;
   border-radius: 10px;
-  color: darkslategray;
+  color: #29443e;
   text-align: center;
   font-size: 1.8rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
+#mainText{
+  margin: 5px 10px 0 10px;
+  padding: 10px 15px; 
+  border: solid 1px #c5d8d3;
+  background-color: #ffffff;
+  border-radius: 10px 10px 0 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#footText{
+  margin: 0 10px 0 10px;
+  padding: 10px 15px; 
+  border: solid 1px #c5d8d3;
+  background-color: #f7faf9;
+  border-radius: 0 0 10px 10px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.croixRouge {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    margin-left: 10px;
+}
   </style>
 </head>
 
 <body>
   <h1>Tu viens à mon pot</h1>
-  <p>Comme tu le sais, mon aventure à l'hôpital suisse se conclut dans 1 mois et demi. Même si je vous aime presque tous, je m'envole de mes propres ailes.<br>
-  on part sur le 13 octobre dans un bar à 20h.<br>
+  <div id="mainText">
+    
+  <p>Comme tu le sais, mon aventure à l'hôpital suisse se conclut dans 1 mois et demi. <br>
+    Même si je vous aime presque tous, je m'envole de mes propres ailes.<br>
+  On part sur le 13 octobre dans un bar à 20h.<br>
   Où ? On verra et ça va dépendre de si j'ai beaucoup d'amis.<br><br>
-  et toi est ce que tu viens ? </p>
+  Et toi est ce que tu viens ? </p>
   <input type="text" id="nomInvite" placeholder="T'es qui déjà ?">
   <button id="showdown">Je viens</button>
+  </div>
+  <div id="footText">
   <p>Liste des gens confirmés.Vous pouvez annuler en cliquant la croix mais n'annulez pas un autre juste parce que vous ne l'aimez pas, Please. </p>
   <ul id="listePresents">
     
   </ul>
+  </div>
   
   <script>
 
@@ -45,9 +84,8 @@ const showdownBtn = document.getElementById ("showdown");
 const listePresents = document.getElementById("listePresents");
  
  const afficherInvites = ()=>{
-
-    listePresents.innerHTML = "";
-    
+   listePresents.innerHTML = "";
+   
   fetch("./presencePot.json")
     .then(response => response.json())
     .then(invites => {
@@ -58,6 +96,14 @@ const listePresents = document.getElementById("listePresents");
         const li = document.createElement("li");
         li.textContent = invite.name;
 
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "❌";
+        deleteBtn.classList.add("croixRouge");
+        deleteBtn.addEventListener("click", () => {
+          inviteAnnule(invite.id);
+        });
+        
+        li.appendChild(deleteBtn);
         listePresents.appendChild(li);
 
       });
@@ -67,7 +113,22 @@ const listePresents = document.getElementById("listePresents");
       console.error("Erreur lors du chargement des invités :", error);
     });
  } 
-    
+   
+const inviteAnnule = async (id) => {
+    const confirmation = confirm("Tu es sûr d'avoir le droit de ne pas venir ?");
+  if (!confirmation) {
+    return;
+  }
+  
+      const response = await fetch(`/annuler-invite/${id}`, {
+        method: "DELETE"
+      });
+
+      if (response.ok) {
+        afficherInvites();
+      }
+};
+
     const showdownFtn = async () =>{
       const nom = nomInviteInput.value.trim();
       if (!nom){
@@ -83,18 +144,26 @@ const listePresents = document.getElementById("listePresents");
     body: JSON.stringify({
       name: nom
     })
-  });
+      });
 
   if (response.ok) {
     nomInviteInput.value = "";
     afficherInvites();
+    alert("Ta candidature sera étudiée sérieusement. Merci");
   }
     }
+
     showdownBtn.addEventListener("click", showdownFtn);
+
+    nomInviteInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    showdownFtn();
+  }
+});
+
     afficherInvites();
     
   </script>
 </body>
 
 </html>
-Mieux ? 
